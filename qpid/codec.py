@@ -26,10 +26,11 @@ fields.
 The unit test for this module is located in tests/codec.py
 """
 
-import re, qpid, spec08, os
-from cStringIO import StringIO
+import re, os, qpid
+from . import spec08
+from io import StringIO
 from struct import *
-from reference import ReferenceId
+from .reference import ReferenceId
 from logging import getLogger
 
 log = getLogger("qpid.codec")
@@ -72,10 +73,10 @@ class Codec:
 
     self.types = {}
     self.codes = {}
-    self.integertypes = [int, long]
+    self.integertypes = [int, int]
     self.encodings = {
       float: "double", # python uses 64bit floats, send them as doubles
-      basestring: "longstr",
+      str: "longstr",
       None.__class__:"void",
       list: "sequence",
       tuple: "sequence",
@@ -131,7 +132,7 @@ class Codec:
         return "signed_long"
       else:
         raise ValueError('Integer value is outwith the supported 64bit signed range')
-    if self.encodings.has_key(klass):
+    if klass in self.encodings:
       return self.encodings[klass]
     for base in klass.__bases__:
       result = self.resolve(base, value)
@@ -436,7 +437,7 @@ class Codec:
     enc = StringIO()
     codec = Codec(enc, self.spec)
     if tbl:
-      for key, value in tbl.items():
+      for key, value in list(tbl.items()):
         if self.spec.major == 8 and self.spec.minor == 0 and len(key) > 128:
           raise ValueError("field table key too long: '%s'" % key)
         type = self.resolve(value.__class__, value)
@@ -461,7 +462,7 @@ class Codec:
       log.debug("Field table entry key: %r", key)
       code = self.decode_octet()
       log.debug("Field table entry type code: %r", code)
-      if self.types.has_key(code):
+      if code in self.types:
         value = self.decode(self.types[code])
       else:
         w = width(code)
@@ -649,7 +650,7 @@ class Codec:
     count = self.decode_long()
     result = []
     for i in range(0, count):
-      if self.types.has_key(code):
+      if code in self.types:
         value = self.decode(self.types[code])
       else:
         w = width(code)

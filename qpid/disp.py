@@ -130,7 +130,7 @@ class Display:
       for idx in range(diff):
         row.append("")
 
-    print title
+    print(title)
     if len (rows) == 0:
       return
     colWidth = []
@@ -139,7 +139,7 @@ class Display:
     for head in heads:
       width = len (head)
       for row in rows:
-        cellWidth = len (unicode (row[col]))
+        cellWidth = len (str (row[col]))
         if cellWidth > width:
           width = cellWidth
       colWidth.append (width + self.tableSpacing)
@@ -148,23 +148,23 @@ class Display:
         for i in range (colWidth[col] - len (head)):
           line = line + " "
       col = col + 1
-    print line
+    print(line)
     line = self.tablePrefix
     for width in colWidth:
       line = line + "=" * width
     line = line[:255]
-    print line
+    print(line)
 
     for row in rows:
       line = self.tablePrefix
       col  = 0
       for width in colWidth:
-        line = line + unicode (row[col])
+        line = line + str (row[col])
         if col < len (heads) - 1:
-          for i in range (width - len (unicode (row[col]))):
+          for i in range (width - len (str (row[col]))):
             line = line + " "
         col = col + 1
-      print line
+      print(line)
 
   def do_setTimeFormat (self, fmt):
     """ Select timestamp format """

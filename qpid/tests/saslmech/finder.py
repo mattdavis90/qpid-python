@@ -19,8 +19,8 @@
 
 from unittest import TestCase
 from qpid.saslmech.finder import get_sasl_mechanism
-from my_sasl import MY_SASL
-from my_sasl2 import MY_SASL2
+from .my_sasl import MY_SASL
+from .my_sasl2 import MY_SASL2
 
 class SaslFinderTests (TestCase):
   """Tests the ability to chose the a sasl mechanism from those available to be loaded"""
@@ -32,7 +32,7 @@ class SaslFinderTests (TestCase):
     mech = get_sasl_mechanism(supportedMechs, "myuser", "mypass", namespace="qpid.tests.saslmech")
 
     self.assertTrue(isinstance(mech, MY_SASL), "Mechanism %s is of unexpected type" % mech)
-    self.assertEquals("MY-SASL", mech.mechanismName())
+    self.assertEqual("MY-SASL", mech.mechanismName())
     self.assertTrue(mech.sasl_options is None)
 
   def test_unknown_mechansim(self):
@@ -68,4 +68,4 @@ class SaslFinderTests (TestCase):
     mech = get_sasl_mechanism(supportedMechs, "myuser", "mypass", namespace="qpid.tests.saslmech", sasl_options=sasl_options)
 
     self.assertTrue(isinstance(mech, MY_SASL), "Mechanism %s is of unexpected type" % mech)
-    self.assertEquals(sasl_options, mech.sasl_options)
+    self.assertEqual(sasl_options, mech.sasl_options)

@@ -18,14 +18,14 @@
 #
 
 from threading import Condition, RLock, Lock, currentThread
-from generator import command_invoker
-from datatypes import RangedSet, Struct, Future
-from codec010 import StringCodec
-from queue import Queue
-from datatypes import Message, serial
-from ops import Command, MessageTransfer
-from util import wait, notify
-from exceptions import *
+from .generator import command_invoker
+from .datatypes import RangedSet, Struct, Future
+from .codec010 import StringCodec
+from .queue import Queue
+from .datatypes import Message, serial
+from .ops import Command, MessageTransfer
+from .util import wait, notify
+from .exceptions import *
 from logging import getLogger
 
 log = getLogger("qpid.io.cmd")
@@ -123,7 +123,7 @@ class Session(command_invoker()):
         f.error(error)
       self.results.clear()
 
-      for q in self._incoming.values():
+      for q in list(self._incoming.values()):
         q.close(error)
 
       self._closed = True
@@ -275,7 +275,7 @@ class Incoming(Queue):
   def start(self):
     self.session.message_set_flow_mode(self.destination, self.session.flow_mode.credit)
     for unit in self.session.credit_unit.VALUES:
-      self.session.message_flow(self.destination, unit, 0xFFFFFFFFL)
+      self.session.message_flow(self.destination, unit, 0xFFFFFFFF)
 
   def stop(self):
     self.session.message_cancel(self.destination)

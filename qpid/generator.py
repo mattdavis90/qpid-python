@@ -19,7 +19,7 @@
 
 import sys
 
-from ops import *
+from .ops import *
 
 def METHOD(module, op):
   method = lambda self, *args, **kwargs: self.invoke(op, args, kwargs)
@@ -32,16 +32,16 @@ def METHOD(module, op):
 def generate(module, operations):
   dict = {}
 
-  for name, enum in ENUMS.items():
-    if isinstance(name, basestring):
+  for name, enum in list(ENUMS.items()):
+    if isinstance(name, str):
       dict[name] = enum
 
-  for name, op in COMPOUND.items():
-    if isinstance(name, basestring):
+  for name, op in list(COMPOUND.items()):
+    if isinstance(name, str):
       dict[name] = METHOD(module, op)
 
-  for name, op in operations.items():
-    if isinstance(name, basestring):
+  for name, op in list(operations.items()):
+    if isinstance(name, str):
       dict[name] = METHOD(module, op)
 
   return dict

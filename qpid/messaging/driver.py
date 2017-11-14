@@ -127,7 +127,7 @@ class SessionState:
     self.write_cmd(query, lambda: handler(self.results.pop(id), obj))
 
   def apply_overrides(self, cmd, overrides):
-    for k, v in overrides.items():
+    for k, v in list(overrides.items()):
       cmd[k.replace('-', '_')] = v
 
   def write_cmd(self, cmd, action=noop, overrides=None, sync=True):
@@ -163,9 +163,9 @@ RELIABILITY = Values("unreliable", "at-most-once", "at-least-once",
 
 DECLARE = Map({}, restricted=False)
 BINDINGS = List(Map({
-      "exchange": Types(basestring),
-      "queue": Types(basestring),
-      "key": Types(basestring),
+      "exchange": Types(str),
+      "queue": Types(str),
+      "key": Types(str),
       "arguments": Map({}, restricted=False)
       }))
 
@@ -180,7 +180,7 @@ COMMON_OPTS = {
       "x-bindings": BINDINGS
       }),
   "link": Map({
-      "name": Types(basestring),
+      "name": Types(str),
       "durable": Types(bool),
       "reliability": RELIABILITY,
       "x-declare": DECLARE,
@@ -454,7 +454,7 @@ class Driver:
         self._check_retry_ok()
       else:
         self.close_engine()
-    except socket.error, e:
+    except socket.error as e:
       self.close_engine(ConnectionError(text=str(e)))
 
     self.update_status()
@@ -519,7 +519,7 @@ class Driver:
       if n == 0: return
       sent = self.engine.read(n)
       rawlog.debug("SENT[%s]: %r", self.log_id, sent)
-    except socket.error, e:
+    except socket.error as e:
       self.close_engine(e)
       notify = True
 
@@ -551,10 +551,10 @@ class Driver:
           self.connect()
       elif self.engine is not None:
         self.engine.dispatch()
-    except HeartbeatTimeout, e:
+    except HeartbeatTimeout as e:
       log.warn("Heartbeat timeout")
       self.close_engine(e)
-    except ContentError, e:
+    except ContentError as e:
       msg = compat.format_exc()
       self.connection.error = ContentError(text=msg)
     except:
@@ -580,7 +580,7 @@ class Driver:
       else:
         raise ConnectError("no such transport: %s" % self.connection.transport)
       self.schedule()
-    except socket.error, e:
+    except socket.error as e:
       self.close_engine(ConnectError(text=str(e)))
 
 DEFAULT_DISPOSITION = Disposition(None)
@@ -662,7 +662,7 @@ class Engine:
   def _reset(self):
     self.connection._transport_connected = False
 
-    for ssn in self.connection.sessions.values():
+    for ssn in list(self.connection.sessions.values()):
       for m in ssn.acked + ssn.unacked + ssn.incoming:
         m._transfer_id = None
       for snd in ssn.senders:
@@ -696,7 +696,7 @@ class Engine:
         opslog.debug("RCVD[%s]: %r", self.log_id, op)
         op.dispatch(self)
       self.dispatch()
-    except MessagingError, e:
+    except MessagingError as e:
       self.close(e)
     except:
       self.close(InternalError(text=compat.format_exc()))
@@ -705,7 +705,7 @@ class Engine:
     self._reset()
     # We cannot re-establish transactional sessions, they must be aborted.
     # We could re-do transactional enqueues, but not dequeues.
-    for ssn in self.connection.sessions.values():
+    for ssn in list(self.connection.sessions.values()):
       if ssn.transactional:
         if ssn.committing:
           ssn.error = TransactionUnknown(text="Transaction outcome unknown due to transport failure")
@@ -759,7 +759,7 @@ class Engine:
       mechs = start.mechanisms
     try:
       mech, initial = self._sasl.start(" ".join(mechs))
-    except sasl.SASLError, e:
+    except sasl.SASLError as e:
       if "ANONYMOUS" not in mechs and self.connection.username is None:
         _text="Anonymous connections disabled, missing credentials"
       else:
@@ -820,7 +820,7 @@ class Engine:
 
     if not sc.commands.empty():
       while sst.min_completion in sc.commands:
-        if sst.actions.has_key(sst.min_completion):
+        if sst.min_completion in sst.actions:
           sst.actions.pop(sst.min_completion)()
         sst.min_completion += 1
 
@@ -867,7 +867,7 @@ class Engine:
       self.disconnect()
 
     if self._connected and not self._closing:
-      for ssn in self.connection.sessions.values():
+      for ssn in list(self.connection.sessions.values()):
         self.attach(ssn)
         self.process(ssn)
 
@@ -894,8 +894,8 @@ class Engine:
     if ssn.closed: return
     sst = self._attachments.get(ssn)
     if sst is None:
-      for i in xrange(0, self.channel_max):
-        if not self._sessions.has_key(i):
+      for i in range(0, self.channel_max):
+        if i not in self._sessions:
           ch = i
           break
       else:
@@ -995,9 +995,9 @@ class Engine:
             xdeclare['auto-delete'] = "True"
           if 'exclusive' not in xdeclare:
             xdeclare['exclusive'] = "True"
-      except address.LexError, e:
+      except address.LexError as e:
         return MalformedAddress(text=str(e))
-      except address.ParseError, e:
+      except address.ParseError as e:
         return MalformedAddress(text=str(e))
 
   def validate_options(self, lnk, dir):
@@ -1365,11 +1365,11 @@ class Engine:
     if msg.priority is not None:
       dp.priority = msg.priority
     if msg.ttl is not None:
-      dp.ttl = long(msg.ttl*1000)
+      dp.ttl = int(msg.ttl*1000)
     enc, dec = get_codec(msg.content_type)
     try:
       body = enc(msg.content)
-    except AttributeError, e:
+    except AttributeError as e:
       # convert to non-blocking EncodeError
       raise EncodeError(e)
 
@@ -1428,7 +1428,7 @@ class Engine:
     enc, dec = get_codec(mp.content_type)
     try:
       content = dec(xfr.payload)
-    except Exception, e:
+    except Exception as e:
       raise DecodeError(e)
     msg = Message(content)
     msg.id = mp.message_id

@@ -37,13 +37,13 @@ def pprint(o):
     return pprint_map(o)
   elif isinstance(o, list):
     return pprint_list(o)
-  elif isinstance(o, basestring):
+  elif isinstance(o, str):
     return pprint_string(o)
   else:
     return repr(o)
 
 def pprint_map(m):
-  items = ["%s: %s" % (pprint(k), pprint(v)) for k, v in m.items()]
+  items = ["%s: %s" % (pprint(k), pprint(v)) for k, v in list(m.items())]
   items.sort()
   return pprint_items("{", items, "}")
 
@@ -83,9 +83,9 @@ class AddressTests(ParserBase, Test):
     try:
       from subprocess import Popen, PIPE, STDOUT
       po = Popen([parser, mode], stdin=PIPE, stdout=PIPE, stderr=STDOUT)
-    except ImportError, e:
+    except ImportError as e:
       raise Skipped("%s" % e)
-    except OSError, e:
+    except OSError as e:
       raise Skipped("%s: %s" % (e, parser))
     out, _ = po.communicate(input=input)
     return out
@@ -213,19 +213,19 @@ class AddressTests(ParserBase, Test):
 
   def testSlashUnicode1(self):
     self.valid("foo.bar\\u1234baz.qux.{moo,arf; {key: value}",
-               u"foo.bar\u1234baz.qux.{moo,arf", None, {"key": "value"})
+               "foo.bar\\u1234baz.qux.{moo,arf", None, {"key": "value"})
 
   def testSlashUnicode2(self):
     self.valid("foo.bar\\u0000baz.qux.{moo,arf; {key: value}",
-               u"foo.bar\u0000baz.qux.{moo,arf", None, {"key": "value"})
+               "foo.bar\\u0000baz.qux.{moo,arf", None, {"key": "value"})
 
   def testSlashUnicode3(self):
     self.valid("foo.bar\\uffffbaz.qux.{moo,arf; {key: value}",
-               u"foo.bar\uffffbaz.qux.{moo,arf", None, {"key": "value"})
+               "foo.bar\\uffffbaz.qux.{moo,arf", None, {"key": "value"})
 
   def testSlashUnicode4(self):
     self.valid("foo.bar\\uFFFFbaz.qux.{moo,arf; {key: value}",
-               u"foo.bar\uFFFFbaz.qux.{moo,arf", None, {"key": "value"})
+               "foo.bar\\uFFFFbaz.qux.{moo,arf", None, {"key": "value"})
 
   def testNoName(self):
     self.invalid("; {key: value}",

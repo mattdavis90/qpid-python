@@ -17,7 +17,7 @@
 # under the License.
 #
 
-from sasl import Sasl
+from .sasl import Sasl
 
 class ANONYMOUS(Sasl):
 

@@ -23,14 +23,14 @@
 
 from qpid.content import Content
 from qpid.testlib import TestBase
-from Queue import Empty
+from .queue import Empty
 
 import sys
 from traceback import *
 
 def mytrace(frame, event, arg):
     print_stack(frame);
-    print "===="
+    print("====")
     return mytrace
     
 class TestBaseTest(TestBase):

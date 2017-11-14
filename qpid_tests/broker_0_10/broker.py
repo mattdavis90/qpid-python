@@ -36,24 +36,24 @@ class BrokerTests(TestBase010):
         # No ack consumer
         ctag = "tag1"
         session.message_subscribe(queue = "myqueue", destination = ctag)
-        session.message_flow(destination=ctag, unit=session.credit_unit.message, value=0xFFFFFFFFL)
-        session.message_flow(destination=ctag, unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination=ctag, unit=session.credit_unit.message, value=0xFFFFFFFF)
+        session.message_flow(destination=ctag, unit=session.credit_unit.byte, value=0xFFFFFFFF)
         body = "test no-ack"
         session.message_transfer(message=Message(session.delivery_properties(routing_key="myqueue"), body))
         msg = session.incoming(ctag).get(timeout = 5)
-        self.assert_(msg.body == body)
+        self.assertTrue(msg.body == body)
 
         # Acknowledging consumer
         session.queue_declare(queue = "otherqueue", exclusive=True, auto_delete=True)
         ctag = "tag2"
         session.message_subscribe(queue = "otherqueue", destination = ctag, accept_mode = 1)
-        session.message_flow(destination=ctag, unit=session.credit_unit.message, value=0xFFFFFFFFL)
-        session.message_flow(destination=ctag, unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination=ctag, unit=session.credit_unit.message, value=0xFFFFFFFF)
+        session.message_flow(destination=ctag, unit=session.credit_unit.byte, value=0xFFFFFFFF)
         body = "test ack"
         session.message_transfer(message=Message(session.delivery_properties(routing_key="otherqueue"), body))
         msg = session.incoming(ctag).get(timeout = 5)
         session.message_accept(RangedSet(msg.id))
-        self.assert_(msg.body == body)
+        self.assertTrue(msg.body == body)
         
     def test_simple_delivery_immediate(self):
         """
@@ -64,14 +64,14 @@ class BrokerTests(TestBase010):
         session.exchange_bind(queue="test-queue", exchange="amq.fanout")
         consumer_tag = "tag1"
         session.message_subscribe(queue="test-queue", destination=consumer_tag)
-        session.message_flow(unit = session.credit_unit.message, value = 0xFFFFFFFFL, destination = consumer_tag)
-        session.message_flow(unit = session.credit_unit.byte, value = 0xFFFFFFFFL, destination = consumer_tag)
+        session.message_flow(unit = session.credit_unit.message, value = 0xFFFFFFFF, destination = consumer_tag)
+        session.message_flow(unit = session.credit_unit.byte, value = 0xFFFFFFFF, destination = consumer_tag)
         queue = session.incoming(consumer_tag)
 
         body = "Immediate Delivery"
         session.message_transfer("amq.fanout", None, None, Message(body))
         msg = queue.get(timeout=5)
-        self.assert_(msg.body == body)
+        self.assertTrue(msg.body == body)
 
     def test_simple_delivery_queued(self):
         """
@@ -86,8 +86,8 @@ class BrokerTests(TestBase010):
 
         consumer_tag = "tag1"
         session.message_subscribe(queue="test-queue", destination=consumer_tag)
-        session.message_flow(unit = session.credit_unit.message, value = 0xFFFFFFFFL, destination = consumer_tag)
-        session.message_flow(unit = session.credit_unit.byte, value = 0xFFFFFFFFL, destination = consumer_tag)
+        session.message_flow(unit = session.credit_unit.message, value = 0xFFFFFFFF, destination = consumer_tag)
+        session.message_flow(unit = session.credit_unit.byte, value = 0xFFFFFFFF, destination = consumer_tag)
         queue = session.incoming(consumer_tag)
         msg = queue.get(timeout=5)
-        self.assert_(msg.body == body)
+        self.assertTrue(msg.body == body)

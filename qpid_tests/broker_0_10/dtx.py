@@ -162,8 +162,8 @@ class DtxTests(TestBase010):
             session.dtx_end(xid=tx)
             session.dtx_rollback(xid=tx)
             self.fail("Session not selected for use with dtx, expected exception!")
-        except SessionException, e:
-            self.assertEquals(503, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(503, e.args[0].error_code)
 
     def test_start_already_known(self):
         """
@@ -187,7 +187,7 @@ class DtxTests(TestBase010):
         failed = False
         try:
             session2.dtx_start(xid=tx)
-        except SessionException, e:
+        except SessionException as e:
             failed = True
             error = e
 
@@ -199,7 +199,7 @@ class DtxTests(TestBase010):
         session1.dtx_rollback(xid=tx)
 
         #verification:
-        if failed: self.assertEquals(530, error.args[0].error_code)
+        if failed: self.assertEqual(530, error.args[0].error_code)
         else: self.fail("Xid already known, expected exception!")
 
     def test_forget_xid_on_completion(self):
@@ -233,8 +233,8 @@ class DtxTests(TestBase010):
             session.dtx_end(xid=tx)
             session.dtx_rollback(xid=tx)
             self.fail("Join and resume both set, expected exception!")
-        except SessionException, e:
-            self.assertEquals(503, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(503, e.args[0].error_code)
 
     def test_start_join(self):
         """
@@ -353,8 +353,8 @@ class DtxTests(TestBase010):
         try:
             session.dtx_end(xid=tx, suspend=True, fail=True)
             self.fail("Suspend and fail both set, expected exception!")
-        except SessionException, e:
-            self.assertEquals(503, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(503, e.args[0].error_code)
 
         #cleanup
         other = self.connect()
@@ -376,8 +376,8 @@ class DtxTests(TestBase010):
         try:
             session.dtx_end(xid=tx)
             self.fail("Attempted to end association with unknown xid, expected exception!")
-        except SessionException, e:
-            self.assertEquals(409, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(409, e.args[0].error_code)
 
     def test_end(self):
         """
@@ -431,13 +431,13 @@ class DtxTests(TestBase010):
         failed = False
         try:
             tester.dtx_commit(xid=tx, one_phase=True)
-        except SessionException, e:
+        except SessionException as e:
             failed = True
             error = e
 
         if failed:
             self.session.dtx_rollback(xid=tx)
-            self.assertEquals(409, error.args[0].error_code)
+            self.assertEqual(409, error.args[0].error_code)
         else:
             tester.close()
             other.close()
@@ -459,13 +459,13 @@ class DtxTests(TestBase010):
         failed = False
         try:
             tester.dtx_commit(xid=tx, one_phase=False)
-        except SessionException, e:
+        except SessionException as e:
             failed = True
             error = e
 
         if failed:
             self.session.dtx_rollback(xid=tx)
-            self.assertEquals(409, error.args[0].error_code)
+            self.assertEqual(409, error.args[0].error_code)
         else:
             tester.close()
             other.close()
@@ -486,14 +486,14 @@ class DtxTests(TestBase010):
         failed = False
         try:
             tester.dtx_commit(xid=tx, one_phase=False)
-        except SessionException, e:
+        except SessionException as e:
             failed = True
             error = e
 
         if failed:
             self.session.dtx_end(xid=tx)
             self.session.dtx_rollback(xid=tx)
-            self.assertEquals(409, error.args[0].error_code)
+            self.assertEqual(409, error.args[0].error_code)
         else:
             tester.close()
             other.close()
@@ -514,14 +514,14 @@ class DtxTests(TestBase010):
         failed = False
         try:
             tester.dtx_rollback(xid=tx)
-        except SessionException, e:
+        except SessionException as e:
             failed = True
             error = e
 
         if failed:
             self.session.dtx_end(xid=tx)
             self.session.dtx_rollback(xid=tx)
-            self.assertEquals(409, error.args[0].error_code)
+            self.assertEqual(409, error.args[0].error_code)
         else:
             tester.close()
             other.close()
@@ -543,14 +543,14 @@ class DtxTests(TestBase010):
         failed = False
         try:
             tester.dtx_prepare(xid=tx)
-        except SessionException, e:
+        except SessionException as e:
             failed = True
             error = e
 
         if failed:
             self.session.dtx_end(xid=tx)
             self.session.dtx_rollback(xid=tx)
-            self.assertEquals(409, error.args[0].error_code)
+            self.assertEqual(409, error.args[0].error_code)
         else:
             tester.close()
             other.close()
@@ -574,7 +574,7 @@ class DtxTests(TestBase010):
         session2.dtx_start(xid=tx)
         session2.message_subscribe(queue="dummy", destination="dummy")
         session2.message_flow(destination="dummy", unit=session2.credit_unit.message, value=1)
-        session2.message_flow(destination="dummy", unit=session2.credit_unit.byte, value=0xFFFFFFFFL)
+        session2.message_flow(destination="dummy", unit=session2.credit_unit.byte, value=0xFFFFFFFF)
         msg = session2.incoming("dummy").get(timeout=1)
         session2.message_accept(RangedSet(msg.id))
         session2.message_cancel(destination="dummy")
@@ -641,8 +641,8 @@ class DtxTests(TestBase010):
         session.dtx_start(xid=tx)
         try:
             session.dtx_set_timeout(xid=tx, timeout=3601)
-        except SessionException, e:
-            self.assertEquals(542, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(542, e.args[0].error_code)
 
 
 
@@ -690,36 +690,36 @@ class DtxTests(TestBase010):
         session = self.session
         try:
             session.dtx_start(resume=True)
-        except SessionException, e:
-            self.assertEquals(503, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(503, e.args[0].error_code)
 
     def test_prepare_unknown(self):
         session = self.session
         try:
             session.dtx_prepare(xid=self.xid("unknown"))
-        except SessionException, e:
-            self.assertEquals(404, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(404, e.args[0].error_code)
 
     def test_commit_unknown(self):
         session = self.session
         try:
             session.dtx_commit(xid=self.xid("unknown"))
-        except SessionException, e:
-            self.assertEquals(404, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(404, e.args[0].error_code)
 
     def test_rollback_unknown(self):
         session = self.session
         try:
             session.dtx_rollback(xid=self.xid("unknown"))
-        except SessionException, e:
-            self.assertEquals(404, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(404, e.args[0].error_code)
 
     def test_get_timeout_unknown(self):
         session = self.session
         try:
             session.dtx_get_timeout(xid=self.xid("unknown"))
-        except SessionException, e:
-            self.assertEquals(404, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(404, e.args[0].error_code)
 
     def xid(self, txid):
         DtxTests.tx_counter += 1
@@ -751,7 +751,7 @@ class DtxTests(TestBase010):
         #consume from src:
         session.message_subscribe(destination="temp-swap", queue=src)
         session.message_flow(destination="temp-swap", unit=session.credit_unit.message, value=1)
-        session.message_flow(destination="temp-swap", unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination="temp-swap", unit=session.credit_unit.byte, value=0xFFFFFFFF)
         msg = session.incoming("temp-swap").get(timeout=1)
         session.message_cancel(destination="temp-swap")
         session.message_accept(RangedSet(msg.id))
@@ -768,7 +768,7 @@ class DtxTests(TestBase010):
     def assertMessageId(self, expected, queue):
         self.session.message_subscribe(queue=queue, destination="results")
         self.session.message_flow(destination="results", unit=self.session.credit_unit.message, value=1)
-        self.session.message_flow(destination="results", unit=self.session.credit_unit.byte, value=0xFFFFFFFFL)
+        self.session.message_flow(destination="results", unit=self.session.credit_unit.byte, value=0xFFFFFFFF)
         self.assertEqual(expected, self.getMessageProperty(self.session.incoming("results").get(timeout=1), 'correlation_id'))
         self.session.message_cancel(destination="results")
 

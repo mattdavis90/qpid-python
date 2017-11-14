@@ -16,9 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import re, rfc822
-from lexer import Lexicon, LexError
-from parser import Parser, ParseError
+import re
+import email.utils
+from .lexer import Lexicon, LexError
+from .parser import Parser, ParseError
 
 l = Lexicon()
 
@@ -96,9 +97,9 @@ class MimeTypeParser(Parser):
     if self.matches(TOKEN):
       return self.eat().value
     elif self.matches(STRING):
-      return rfc822.unquote(self.eat().value)
+      return email.utils.unquote(self.eat().value)
     else:
-      raise ParseError(self.next(), TOKEN, STRING)
+      raise ParseError(next(self), TOKEN, STRING)
 
 def parse(addr):
   return MimeTypeParser(lex(addr)).parse()

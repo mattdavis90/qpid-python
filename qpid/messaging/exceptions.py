@@ -33,7 +33,7 @@ class MessagingError(Exception):
     else:
       msg = "%s(%s)" % (self.text, self.code)
     if info:
-      msg += " " + ", ".join(["%s=%r" % (k, v) for k, v in self.info.items()])
+      msg += " " + ", ".join(["%s=%r" % (k, v) for k, v in list(self.info.items())])
     Exception.__init__(self, msg)
 class InternalError(MessagingError):
   pass

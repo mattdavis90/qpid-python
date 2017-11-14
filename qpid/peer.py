@@ -25,13 +25,13 @@ incoming method frames to a delegate.
 """
 
 import threading, traceback, socket, sys
-from connection08 import EOF, Method, Header, Body, Request, Response, VersionError
-from message import Message
-from queue import Queue, Closed as QueueClosed
-from content import Content
-from cStringIO import StringIO
+from .connection08 import EOF, Method, Header, Body, Request, Response, VersionError
+from .message import Message
+from .queue import Queue, Closed as QueueClosed
+from .content import Content
+from io import StringIO
 from time import time
-from exceptions import Closed, Timeout, ContentError
+from .exceptions import Closed, Timeout, ContentError
 from logging import getLogger
 
 log = getLogger("qpid.peer")
@@ -44,7 +44,7 @@ class Sequence:
     self.step = step
     self.lock = threading.Lock()
 
-  def next(self):
+  def __next__(self):
     self.lock.acquire()
     try:
       result = self._next
@@ -104,12 +104,12 @@ class Peer:
       while True:
         try:
           frame = self.conn.read()
-        except EOF, e:
+        except EOF as e:
           self.work.close("Connection lost")
           break
         ch = self.channel(frame.channel)
         ch.receive(frame, self.work)
-    except VersionError, e:
+    except VersionError as e:
       self.closed(e)
     except:
       self.fatal()
@@ -119,7 +119,7 @@ class Peer:
     # may wake up waiting threads and we don't want them to see
     # the delegate as open.
     self.delegate.closed(reason)
-    for ch in self.channels.values():
+    for ch in list(self.channels.values()):
       ch.closed(reason)
     self.outgoing.close()
 
@@ -129,7 +129,7 @@ class Peer:
         try:
           message = self.outgoing.get()
           self.conn.write(message)
-        except socket.error, e:
+        except socket.error as e:
           self.closed(e)
           break
         self.conn.flush()
@@ -150,7 +150,7 @@ class Peer:
           content = None
 
         self.delegate(channel, Message(channel, frame, content))
-    except QueueClosed, e:
+    except QueueClosed as e:
       self.closed(str(e) or "worker closed")
     except:
       self.fatal()
@@ -182,7 +182,7 @@ class Requester:
     self.outstanding = {}
 
   def request(self, method, listener, content = None):
-    frame = Request(self.sequence.next(), self.mark, method)
+    frame = Request(next(self.sequence), self.mark, method)
     self.outstanding[frame.id] = listener
     self.write(frame, content)
 
@@ -202,9 +202,9 @@ class Responder:
     else:
       # allow batching from frame at either end
       if batch<0:
-        frame = Response(self.sequence.next(), request.id+batch, -batch, method)
+        frame = Response(next(self.sequence), request.id+batch, -batch, method)
       else:
-        frame = Response(self.sequence.next(), request.id, batch, method)
+        frame = Response(next(self.sequence), request.id, batch, method)
       self.write(frame)
 
 class Channel:
@@ -245,7 +245,7 @@ class Channel:
     self.responses.close()
     self.completion.close()
     self.incoming_completion.reset()
-    for f in self.futures.values():
+    for f in list(self.futures.values()):
       f.put_response(self, reason)
 
   def write(self, frame, content = None):
@@ -266,12 +266,12 @@ class Channel:
     for child in content.children:
       self.write_content(klass, child)
     if content.body:
-      if not isinstance(content.body, (basestring, buffer)):
+      if not isinstance(content.body, (str, buffer)):
         # The 0-8..0-91 client does not support the messages bodies apart from string/buffer - fail early
         # if other type
         raise ContentError("Content body must be string or buffer, not a %s" % type(content.body))
       frame_max = self.client.tune_params['frame_max'] - self.client.conn.AMQP_HEADER_SIZE
-      for chunk in (content.body[i:i + frame_max] for i in xrange(0, len(content.body), frame_max)):
+      for chunk in (content.body[i:i + frame_max] for i in range(0, len(content.body), frame_max)):
         self.write(Body(chunk))
 
   def receive(self, frame, work):
@@ -339,7 +339,7 @@ class Channel:
         return Message(self, resp, read_content(self.responses))
       else:
         return Message(self, resp)
-    except QueueClosed, e:
+    except QueueClosed as e:
       if self._closed:
         raise Closed(self.reason)
       else:
@@ -396,7 +396,7 @@ class Channel:
           raise Closed(self.reason)
         if not completed:
           self.closed("Timed-out waiting for completion of %s" % frame)
-    except QueueClosed, e:
+    except QueueClosed as e:
       if self._closed:
         raise Closed(self.reason)
       else:
@@ -473,7 +473,7 @@ class OutgoingCompletion:
   def next_command(self, method):
     #the following test is a hack until the track/sub-channel is available
     if method.is_l4_command():
-      self.command_id = self.sequence.next()
+      self.command_id = next(self.sequence)
 
   def reset(self):
     self.sequence = Sequence(0) #reset counter
@@ -534,6 +534,6 @@ class IncomingCompletion:
       #TODO: record and manage the ranges properly
       range = [mark, mark]
       if (self.mark == -1):#hack until wraparound is implemented        
-        self.channel.execution_complete(cumulative_execution_mark=0xFFFFFFFFL, ranged_execution_set=range)
+        self.channel.execution_complete(cumulative_execution_mark=0xFFFFFFFF, ranged_execution_set=range)
       else:
         self.channel.execution_complete(cumulative_execution_mark=self.mark, ranged_execution_set=range)

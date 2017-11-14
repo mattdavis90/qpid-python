@@ -38,7 +38,7 @@ class Parser:
     self.tokens = tokens
     self.idx = 0
 
-  def next(self):
+  def __next__(self):
     return self.tokens[self.idx]
 
   def matches(self, *types):
@@ -46,9 +46,9 @@ class Parser:
 
   def eat(self, *types):
     if types and not self.matches(*types):
-      raise ParseError(self.next(), *types)
+      raise ParseError(next(self), *types)
     else:
-      t = self.next()
+      t = next(self)
       self.idx += 1
       return t
 

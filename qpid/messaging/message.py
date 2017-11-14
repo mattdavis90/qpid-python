@@ -40,10 +40,8 @@ def codec(name):
 TYPE_MAPPINGS={
   dict: "amqp/map",
   list: "amqp/list",
-  unicode: "text/plain; charset=utf8",
-  unicode: "text/plain",
-  buffer: None,
-  str: None,
+  str: "text/plain; charset=utf8",
+  bytes: None,
   None.__class__: None
   }
 
@@ -167,7 +165,7 @@ class Disposition:
 
   def __repr__(self):
     args = [str(self.type)] + \
-        ["%s=%r" % (k, v) for k, v in self.options.items()]
+        ["%s=%r" % (k, v) for k, v in list(self.options.items())]
     return "Disposition(%s)" % ", ".join(args)
 
 __all__ = ["Message", "Disposition"]

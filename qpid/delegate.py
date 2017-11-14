@@ -22,7 +22,7 @@ Delegate implementation intended for use with the peer module.
 """
 
 import threading, inspect, traceback, sys
-from connection08 import Method, Request, Response
+from .connection08 import Method, Request, Response
 
 def _handler_name(method):
   return "%s_%s" % (method.klass.name, method.name)
@@ -46,8 +46,8 @@ class Delegate:
     try:
       return handler(channel, frame)
     except:
-      print >> sys.stderr, "Error in handler: %s\n\n%s" % \
-            (_handler_name(method), traceback.format_exc())
+      print("Error in handler: %s\n\n%s" % \
+            (_handler_name(method), traceback.format_exc()), file=sys.stderr)
 
   def closed(self, reason):
-    print "Connection closed: %s" % reason
+    print("Connection closed: %s" % reason)

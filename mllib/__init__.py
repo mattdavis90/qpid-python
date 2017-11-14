@@ -22,22 +22,23 @@ This module provides document parsing and transformation utilities for
 both SGML and XML.
 """
 
-import os, dom, transforms, parsers, sys
+import os, sys
+from . import dom, transforms, parsers
 import xml.sax, types
 from xml.sax.handler import ErrorHandler
 from xml.sax.xmlreader import InputSource
-from cStringIO import StringIO
+from io import StringIO
 
 def transform(node, *args):
   result = node
   for t in args:
-    if isinstance(t, types.ClassType):
+    if isinstance(t, type):
       t = t()
     result = result.dispatch(t)
   return result
 
 def sgml_parse(source):
-  if isinstance(source, basestring):
+  if isinstance(source, str):
     source = StringIO(source)
     fname = "<string>"
   elif hasattr(source, "name"):

@@ -175,7 +175,7 @@ class ManagementTest (TestBase010):
         session.queue_declare(queue="src-queue", exclusive=True, auto_delete=True)
         session.exchange_bind(queue="src-queue", exchange="amq.direct", binding_key="routing_key")
 
-        twenty = range(1,21)
+        twenty = list(range(1,21))
         props = session.delivery_properties(routing_key="routing_key")
         for count in twenty:
             body = "Move Message %d" % count
@@ -229,8 +229,8 @@ class ManagementTest (TestBase010):
 
         "Consume the messages of the queue and check they are all there in order"
         session.message_subscribe(queue="src-queue", destination="tag")
-        session.message_flow(destination="tag", unit=session.credit_unit.message, value=0xFFFFFFFFL)
-        session.message_flow(destination="tag", unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination="tag", unit=session.credit_unit.message, value=0xFFFFFFFF)
+        session.message_flow(destination="tag", unit=session.credit_unit.byte, value=0xFFFFFFFF)
         queue = session.incoming("tag")
         for count in twenty:
             consumed_msg = queue.get(timeout=1)
@@ -248,7 +248,7 @@ class ManagementTest (TestBase010):
         session.queue_declare(queue="purge-queue", exclusive=True, auto_delete=True)
         session.exchange_bind(queue="purge-queue", exchange="amq.direct", binding_key="routing_key")
 
-        twenty = range(1,21)
+        twenty = list(range(1,21))
         props = session.delivery_properties(routing_key="routing_key")
         for count in twenty:
             body = "Purge Message %d" % count
@@ -324,7 +324,7 @@ class ManagementTest (TestBase010):
         session.queue_declare(queue="reroute-queue", exclusive=True, auto_delete=True, alternate_exchange="alt.direct1")
         session.exchange_bind(queue="reroute-queue", exchange="amq.direct", binding_key="routing_key")
 
-        twenty = range(1,21)
+        twenty = list(range(1,21))
         props = session.delivery_properties(routing_key="routing_key")
         mp    = session.message_properties(application_headers={'x-qpid.trace' : 'A,B,C'})
         for count in twenty:
@@ -373,7 +373,7 @@ class ManagementTest (TestBase010):
         self.assertEqual(aq.msgDepth,19)
 
         "Make more messages"
-        twenty = range(1,21)
+        twenty = list(range(1,21))
         props = session.delivery_properties(routing_key="routing_key")
         for count in twenty:
             body = "Reroute Message %d" % count

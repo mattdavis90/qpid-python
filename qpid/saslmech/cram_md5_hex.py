@@ -17,7 +17,7 @@
 # under the License.
 #
 
-from sasl import Sasl
+from .sasl import Sasl
 from hmac import HMAC
 from hashlib import md5
 

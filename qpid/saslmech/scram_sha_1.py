@@ -17,7 +17,7 @@
 # under the License.
 #
 
-from scram import SCRAM_base
+from .scram import SCRAM_base
 from hashlib import sha1
 
 class SCRAM_SHA_1(SCRAM_base):

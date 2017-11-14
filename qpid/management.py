@@ -29,10 +29,10 @@ import qpid
 import struct
 import socket
 from threading    import Thread
-from datatypes    import Message, RangedSet
+from .datatypes    import Message, RangedSet
 from time         import time
-from cStringIO    import StringIO
-from codec010     import StringCodec as Codec
+from io    import StringIO
+from .codec010     import StringCodec as Codec
 from threading    import Lock, Condition
 
 
@@ -177,12 +177,12 @@ class managementChannel:
     ssn.incoming ("rdest").listen (self.replyCb)
 
     ssn.message_set_flow_mode (destination="tdest", flow_mode=1)
-    ssn.message_flow (destination="tdest", unit=0, value=0xFFFFFFFFL)
-    ssn.message_flow (destination="tdest", unit=1, value=0xFFFFFFFFL)
+    ssn.message_flow (destination="tdest", unit=0, value=0xFFFFFFFF)
+    ssn.message_flow (destination="tdest", unit=1, value=0xFFFFFFFF)
 
     ssn.message_set_flow_mode (destination="rdest", flow_mode=1)
-    ssn.message_flow (destination="rdest", unit=0, value=0xFFFFFFFFL)
-    ssn.message_flow (destination="rdest", unit=1, value=0xFFFFFFFFL)
+    ssn.message_flow (destination="rdest", unit=0, value=0xFFFFFFFF)
+    ssn.message_flow (destination="rdest", unit=1, value=0xFFFFFFFF)
 
   def setBrokerInfo (self, data):
     self.brokerInfo = data
@@ -434,9 +434,9 @@ class managementClient:
     elif typecode == 2:
       codec.write_uint16 (int  (value))
     elif typecode == 3:
-      codec.write_uint32 (long (value))
+      codec.write_uint32 (int (value))
     elif typecode == 4:
-      codec.write_uint64 (long (value))
+      codec.write_uint64 (int (value))
     elif typecode == 5:
       codec.write_uint8  (int  (value))
     elif typecode == 6:
@@ -444,9 +444,9 @@ class managementClient:
     elif typecode == 7:
       codec.write_str16 (value)
     elif typecode == 8:  # ABSTIME
-      codec.write_uint64 (long (value))
+      codec.write_uint64 (int (value))
     elif typecode == 9:  # DELTATIME
-      codec.write_uint64 (long (value))
+      codec.write_uint64 (int (value))
     elif typecode == 10: # REF
       value.encode(codec)
     elif typecode == 11: # BOOL
@@ -714,7 +714,7 @@ class managementClient:
       maxlen   = None
       desc     = None
 
-      for key, value in ft.items ():
+      for key, value in list(ft.items ()):
         if   key == "unit":
           unit = str (value)
         elif key == "min":
@@ -736,7 +736,7 @@ class managementClient:
       unit   = None
       desc   = None
 
-      for key, value in ft.items ():
+      for key, value in list(ft.items ()):
         if   key == "unit":
           unit = str (value)
         elif key == "desc":
@@ -767,7 +767,7 @@ class managementClient:
         desc    = None
         default = None
 
-        for key, value in ft.items ():
+        for key, value in list(ft.items ()):
           if   key == "unit":
             unit = str (value)
           elif key == "min":

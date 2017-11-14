@@ -110,7 +110,7 @@ class ReporterBase:
             self.batchCount+=1
             if self.batchCount == self.batchSize:
                 self.header()
-                print self.batch.report()
+                print((self.batch.report()))
                 self.create()
                 self.batchCount = 0
 
@@ -119,13 +119,13 @@ class ReporterBase:
         if self.overall == None:
             self.overall = self.create()
         self.header()
-        print self.overall.report()
+        print((self.overall.report()))
 
     def header(self):
         if not self.headerPrinted:
             if self.overall == None:
                 self.overall = self.create()
-            print self.overall.header()
+            print((self.overall.header()))
             self.headerPrinted = True
 
 

@@ -180,7 +180,7 @@ class Connection(Endpoint):
     for key in opt_keys:
         setattr(self, key, None)
     # Get values from options, check for invalid options
-    for (key, value) in options.iteritems():
+    for (key, value) in list(options.items()):
         if key in opt_keys:
             setattr(self, key, value)
         else:
@@ -189,7 +189,7 @@ class Connection(Endpoint):
     # Now handle items that need special treatment or have speical defaults:
     if self.host:
         url = default(url, self.host)
-    if isinstance(url, basestring):
+    if isinstance(url, str):
         url = URL(url)
     self.host = url.host
 
@@ -245,7 +245,7 @@ class Connection(Endpoint):
     self._condition = Condition(self._lock)
     self._waiter = Waiter(self._condition)
     self._modcount = Serial(0)
-    from driver import Driver
+    from .driver import Driver
     self._driver = Driver(self)
 
   def _wait(self, predicate, timeout=None):
@@ -298,7 +298,7 @@ class Connection(Endpoint):
     else:
       name = "%s:%s" % (self.id, name)
 
-    if self.sessions.has_key(name):
+    if name in self.sessions:
       return self.sessions[name]
     else:
       ssn = Session(self, name, transactional)
@@ -344,7 +344,7 @@ class Connection(Endpoint):
 
   def _unlinked(self):
     return [l
-            for ssn in self.sessions.values()
+            for ssn in list(self.sessions.values())
             if not (ssn.error or ssn.closed)
             for l in ssn.senders + ssn.receivers
             if not (l.linked or l.error or l.closed)]
@@ -381,7 +381,7 @@ class Connection(Endpoint):
     Close the connection and all sessions.
     """
     try:
-      for ssn in self.sessions.values():
+      for ssn in list(self.sessions.values()):
         ssn.close(timeout=timeout)
     finally:
       self.detach(timeout=timeout)
@@ -671,7 +671,7 @@ class Session(Endpoint):
       self._wakeup()
       try:
         sender._ewait(lambda: sender.linked)
-      except LinkError, e:
+      except LinkError as e:
         sender.close()
         raise e
     return sender
@@ -695,7 +695,7 @@ class Session(Endpoint):
       self._wakeup()
       try:
         receiver._ewait(lambda: receiver.linked)
-      except LinkError, e:
+      except LinkError as e:
         receiver.close()
         raise e
     return receiver
@@ -825,7 +825,7 @@ class Session(Endpoint):
         raise Timeout("commit timed out")
     except TransactionError:
       raise
-    except Exception, e:
+    except Exception as e:
       self.error = TransactionAborted(text="Transaction aborted: %s"%e)
       raise self.error
     if self.aborted:

@@ -81,7 +81,7 @@ class Map:
       return "%s is not a map" % o
 
     ctx.push(o)
-    for k, t in self.map.items():
+    for k, t in list(self.map.items()):
       v = o.get(k)
       if v is not None:
         err = t.validate(v, ctx)

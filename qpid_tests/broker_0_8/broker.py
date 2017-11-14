@@ -38,7 +38,7 @@ class BrokerTests(TestBase):
         body = "test no-ack"
         ch.basic_publish(routing_key = "myqueue", content = Content(body))
         msg = self.client.queue(ctag).get(timeout=self.recv_timeout())
-        self.assert_(msg.content.body == body)
+        self.assertTrue(msg.content.body == body)
 
         # Acknowledging consumer
         self.queue_declare(ch, queue = "otherqueue")
@@ -47,7 +47,7 @@ class BrokerTests(TestBase):
         ch.basic_publish(routing_key = "otherqueue", content = Content(body))
         msg = self.client.queue(ctag).get(timeout=self.recv_timeout())
         ch.basic_ack(delivery_tag = msg.delivery_tag)
-        self.assert_(msg.content.body == body)
+        self.assertTrue(msg.content.body == body)
         
     def test_basic_delivery_immediate(self):
         """
@@ -63,7 +63,7 @@ class BrokerTests(TestBase):
         body = "Immediate Delivery"
         channel.basic_publish(exchange="test-exchange", routing_key="key", content=Content(body), immediate=True)
         msg = queue.get(timeout=self.recv_timeout())
-        self.assert_(msg.content.body == body)
+        self.assertTrue(msg.content.body == body)
 
         # TODO: Ensure we fail if immediate=True and there's no consumer.
 
@@ -82,14 +82,14 @@ class BrokerTests(TestBase):
         reply = channel.basic_consume(queue="test-queue", no_ack=True)
         queue = self.client.queue(reply.consumer_tag)
         msg = queue.get(timeout=self.recv_timeout())
-        self.assert_(msg.content.body == body)
+        self.assertTrue(msg.content.body == body)
 
     def test_invalid_channel(self):
         channel = self.client.channel(200)
         try:
             channel.queue_declare(exclusive=True)
             self.fail("Expected error on queue_declare for invalid channel")
-        except Closed, e:
+        except Closed as e:
             self.assertConnectionException(504, e.args[0])
         
     def test_closed_channel(self):
@@ -99,7 +99,7 @@ class BrokerTests(TestBase):
         try:
             channel.queue_declare(exclusive=True)
             self.fail("Expected error on queue_declare for closed channel")
-        except Closed, e:
+        except Closed as e:
             self.assertConnectionException(504, e.args[0])
 
     def test_channel_flow(self):

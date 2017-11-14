@@ -186,7 +186,7 @@ class TestDrainSpout(unittest.TestCase):
             brokerS = "-b guest:guest@" + qpid_broker
             commandS = " ".join([spout['command'], brokerS, "--content="+"'"+content+"'", addressS])            
         else:  
-            raise "Ain't no such language ...."
+            raise Exception("Ain't no such language ....")
         logging.debug("send(): " + commandS)
         args = shlex.split(commandS)
         popen = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -207,7 +207,7 @@ class TestDrainSpout(unittest.TestCase):
             brokerS = "-b guest:guest@" + qpid_broker
             commandS = " ".join([drain['command'], brokerS, optionS, addressS])
         else:  
-            raise "Ain't no such language ...."
+            raise Exception("Ain't no such language ....")
         logging.debug("receive() " + commandS)
         args = shlex.split(commandS)
         popen = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -228,7 +228,7 @@ class TestDrainSpout(unittest.TestCase):
             commandS = " ".join([drain['command'], brokerS, optionS, destination])
         else:
             logging.debug("subscribe() - no such language!")  
-            raise "Ain't no such language ...."
+            raise Exception("Ain't no such language ....")
         logging.debug("subscribe() " + commandS)
         args = shlex.split(commandS)
         return subprocess.Popen(args, stdout=subprocess.PIPE)

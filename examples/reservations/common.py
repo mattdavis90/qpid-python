@@ -25,7 +25,7 @@ from qpid.messaging import *
 class Dispatcher:
 
   def unhandled(self, msg):
-    print "UNHANDLED MESSAGE: %s" % msg
+    print(("UNHANDLED MESSAGE: %s" % msg))
 
   def ignored(self, msg):
     return False
@@ -60,8 +60,8 @@ class Dispatcher:
         try:
           snd = session.sender(to)
           snd.send(r)
-        except SendError, e:
-          print e
+        except SendError as e:
+          print(e)
         finally:
           snd.close()
 

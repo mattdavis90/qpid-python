@@ -17,7 +17,7 @@
 # under the License.
 #
 
-import connection
+from . import connection
 
 class Struct:
 
@@ -31,7 +31,7 @@ class Struct:
     for a, f in zip(args, self.type.fields):
       self.set(f.name, a)
 
-    for k, a in kwargs.items():
+    for k, a in list(kwargs.items()):
       self.set(k, a)
 
   def _check(self, attr):
@@ -41,11 +41,11 @@ class Struct:
     return field
 
   def exists(self, attr):
-    return self.type.fields.byname.has_key(attr)
+    return attr in self.type.fields.byname
 
   def has(self, attr):
     self._check(attr)
-    return self._values.has_key(attr)
+    return attr in self._values
 
   def set(self, attr, value):
     self._check(attr)

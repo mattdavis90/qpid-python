@@ -37,13 +37,13 @@ class ExtensionTests(TestBase010):
         self.assertEqual(name, result.queue)
         sleep(5)
         result = session.queue_query(queue=name)
-        self.assert_(not result.queue)
+        self.assertTrue(not result.queue)
 
     def valid_policy_args(self, args, name="test-queue"):
         try:
             self.session.queue_declare(queue=name, arguments=args)
             self.session.queue_delete(queue=name) # cleanup
-        except SessionException, e:
+        except SessionException as e:
             self.fail("declare with valid policy args failed: %s" % (args))
             self.session = self.conn.session("replacement", 2)
 
@@ -56,7 +56,7 @@ class ExtensionTests(TestBase010):
                 self.session.queue_declare(queue=name, arguments=args)
                 self.session.queue_delete(queue=name) # cleanup
                 self.fail("declare with invalid policy args suceeded: %s (iteration %d)" % (args, i))
-            except SessionException, e:
+            except SessionException as e:
                 self.session = self.conn.session(str(uuid4()))
 
     def test_policy_max_size_as_valid_string(self):

@@ -23,7 +23,8 @@ Tests for exchange behaviour.
 Test classes ending in 'RuleTests' are derived from rules in amqp.xml.
 """
 
-import Queue, logging, traceback
+from . import queue
+import logging, traceback
 from qpid.testlib import TestBase010
 from qpid.datatypes import Message
 from qpid.client import Closed
@@ -46,8 +47,8 @@ class TestHelper(TestBase010):
             for ssn, ex in self.exchanges:
                 ssn.exchange_delete(exchange=ex)
         except:
-            print "Error on tearDown:"
-            print traceback.print_exc()
+            print("Error on tearDown:")
+            print((traceback.print_exc()))
         TestBase010.tearDown(self)
 
     def createMessage(self, key="", body=""):
@@ -83,7 +84,7 @@ class TestHelper(TestBase010):
         try:
             queue.get(timeout=1)
             self.fail("Queue is not empty.")
-        except Queue.Empty: None              # Ignore
+        except queue.Empty: None              # Ignore
         
     def queue_declare(self, session=None, *args, **keys):
         session = session or self.session
@@ -112,8 +113,8 @@ class TestHelper(TestBase010):
         else: self.uniqueTag += 1
         consumer_tag = "tag" + str(self.uniqueTag)
         self.session.message_subscribe(queue=queueName, destination=consumer_tag)
-        self.session.message_flow(destination=consumer_tag, unit=self.session.credit_unit.message, value=0xFFFFFFFFL)
-        self.session.message_flow(destination=consumer_tag, unit=self.session.credit_unit.byte, value=0xFFFFFFFFL)
+        self.session.message_flow(destination=consumer_tag, unit=self.session.credit_unit.message, value=0xFFFFFFFF)
+        self.session.message_flow(destination=consumer_tag, unit=self.session.credit_unit.byte, value=0xFFFFFFFF)
         self.subscriptions.append(consumer_tag)
         return self.session.incoming(consumer_tag)
 
@@ -132,7 +133,7 @@ class StandardExchangeVerifier:
             try:
                 self.assertPublishConsume(exchange=ex, queue="q", routing_key="kk")
                 self.fail("Expected Empty exception")
-            except Queue.Empty: None # Expected
+            except queue.Empty: None # Expected
         finally:
             if unbind:
                 self.session.exchange_unbind(queue="q", exchange=ex, binding_key="k")
@@ -165,7 +166,7 @@ class StandardExchangeVerifier:
             self.session.message_transfer(destination=ex, message=self.createMessage("a.b.x.y"))        
             self.session.message_transfer(destination=ex, message=self.createMessage("x.a.b.x"))        
             self.session.message_transfer(destination=ex, message=self.createMessage("a.b"))
-            self.assert_(q.empty())
+            self.assertTrue(q.empty())
         finally:
             if unbind:
                 self.session.exchange_unbind(queue="a", exchange=ex, binding_key="a.#.b.*")
@@ -299,16 +300,16 @@ class DeclareMethodExchangeFieldReservedRuleTests(TestHelper):
         try:
             self.session.exchange_declare(exchange=reservedString, type=exchangeType)
             self.fail("Expected not allowed error (530) for exchanges starting with \"" + reservedString + "\".")
-        except SessionException, e:
-            self.assertEquals(e.args[0].error_code, 530)
+        except SessionException as e:
+            self.assertEqual(e.args[0].error_code, 530)
         # connection closed, reopen it
         self.tearDown()
         self.setUp()
         try:
             self.session.exchange_declare(exchange=reservedString + "abc123", type=exchangeType)
             self.fail("Expected not allowed error (530) for exchanges starting with \"" + reservedString + "\".")
-        except SessionException, e:
-            self.assertEquals(e.args[0].error_code, 530)
+        except SessionException as e:
+            self.assertEqual(e.args[0].error_code, 530)
         # connection closed, reopen it
         self.tearDown()
         self.setUp()
@@ -363,8 +364,8 @@ class DeclareMethodPassiveFieldNotFoundRuleTests(TestHelper):
         try:
             self.session.exchange_declare(exchange="humpty_dumpty", passive=True)
             self.fail("Expected 404 for passive declaration of unknown exchange.")
-        except SessionException, e:
-            self.assertEquals(404, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(404, e.args[0].error_code)
 
 
 class DeclareMethodDurableFieldSupportRuleTests(TestHelper):
@@ -472,8 +473,8 @@ class MiscellaneousErrorsTests(TestHelper):
         try:
             self.session.exchange_declare(exchange="test_type_not_known_exchange", type="invalid_type")
             self.fail("Expected 404 for declaration of unknown exchange type.")
-        except SessionException, e:
-            self.assertEquals(404, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(404, e.args[0].error_code)
 
     def testDifferentDeclaredType(self):
         self.exchange_declare(exchange="test_different_declared_type_exchange", type="direct")
@@ -481,8 +482,8 @@ class MiscellaneousErrorsTests(TestHelper):
             session = self.conn.session("alternate", 2)
             session.exchange_declare(exchange="test_different_declared_type_exchange", type="topic")
             self.fail("Expected 530 for redeclaration of exchange with different type.")
-        except SessionException, e:
-            self.assertEquals(530, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(530, e.args[0].error_code)
 
     def testReservedExchangeRedeclaredSameType(self):
         self.exchange_declare(exchange="amq.direct", type="direct", passive=True)
@@ -491,31 +492,31 @@ class MiscellaneousErrorsTests(TestHelper):
         try:
             self.exchange_declare(exchange="amq.direct", type="topic")
             self.fail("Expected 530 for redeclaration of exchange with different type.")
-        except SessionException, e:
-            self.assertEquals(530, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(530, e.args[0].error_code)
 
     def testDefaultAccessBind(self):
         try:
             self.session.queue_declare(queue="my-queue", auto_delete=True, exclusive=True)
             self.session.exchange_bind(exchange="", queue="my-queue", binding_key="another-key")
             self.fail("Expected 542 (invalid-argument) code for bind to default exchange.")
-        except SessionException, e:
-            self.assertEquals(542, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(542, e.args[0].error_code)
 
     def testDefaultAccessUnbind(self):
         try:
             self.session.queue_declare(queue="my-queue", auto_delete=True, exclusive=True)
             self.session.exchange_unbind(exchange="", queue="my-queue", binding_key="my-queue")
             self.fail("Expected 542 (invalid-argument) code for unbind from default exchange.")
-        except SessionException, e:
-            self.assertEquals(542, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(542, e.args[0].error_code)
 
     def testDefaultAccessDelete(self):
         try:
             self.session.exchange_delete(exchange="")
             self.fail("Expected 542 (invalid-argument) code for delete of default exchange.")
-        except SessionException, e:
-            self.assertEquals(542, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(542, e.args[0].error_code)
 
 class ExchangeTests(TestHelper):
     def testHeadersBindNoMatchArg(self):
@@ -523,8 +524,8 @@ class ExchangeTests(TestHelper):
         try:
             self.session.exchange_bind(queue="q", exchange="amq.match", arguments={"name":"fred" , "age":3} )
             self.fail("Expected failure for missing x-match arg.")
-        except SessionException, e:
-            self.assertEquals(541, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(541, e.args[0].error_code)
 
 class AutodeleteTests(TestHelper, StandardExchangeVerifier):
     def checkNotExists(self, e):
@@ -533,8 +534,8 @@ class AutodeleteTests(TestHelper, StandardExchangeVerifier):
             s.exchange_declare(exchange=e, passive=True)
             s.exchange_delete(exchange=e)
             self.fail("Expected failure for passive declare of %s" % e)
-        except SessionException, e:
-            self.assertEquals(404, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(404, e.args[0].error_code)
 
 
     def testAutodeleteFanout(self):

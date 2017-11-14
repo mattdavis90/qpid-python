@@ -92,7 +92,7 @@ class AddressParser(Parser):
     name = toks2str(self.eat_until(SLASH, SEMI, EOF))
 
     if name is None:
-      raise ParseError(self.next())
+      raise ParseError(next(self))
 
     if self.matches(SLASH):
       self.eat(SLASH)
@@ -120,11 +120,11 @@ class AddressParser(Parser):
         elif self.matches(RBRACE):
           break
         else:
-          raise ParseError(self.next(), COMMA, RBRACE)
+          raise ParseError(next(self), COMMA, RBRACE)
       elif self.matches(RBRACE):
         break
       else:
-        raise ParseError(self.next(), NUMBER, STRING, ID, LBRACE, LBRACK,
+        raise ParseError(next(self), NUMBER, STRING, ID, LBRACE, LBRACK,
                          RBRACE)
 
     self.eat(RBRACE)
@@ -144,7 +144,7 @@ class AddressParser(Parser):
     elif self.matches(LBRACK):
       return self.list()
     else:
-      raise ParseError(self.next(), NUMBER, STRING, ID, LBRACE, LBRACK)
+      raise ParseError(next(self), NUMBER, STRING, ID, LBRACE, LBRACK)
 
   def list(self):
     self.eat(LBRACK)
@@ -161,7 +161,7 @@ class AddressParser(Parser):
         elif self.matches(RBRACK):
           break
         else:
-          raise ParseError(self.next(), COMMA, RBRACK)
+          raise ParseError(next(self), COMMA, RBRACK)
 
     self.eat(RBRACK)
     return result

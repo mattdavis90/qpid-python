@@ -54,7 +54,7 @@ class ThresholdTests (Base):
     def do_threshold_test(self, args, messages, drain_count, bw_compat=None):
         astr = ''
         first = True
-        for key, value in args.items():
+        for key, value in list(args.items()):
             if first:
                 first = None
             else:

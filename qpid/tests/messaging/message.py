@@ -29,8 +29,8 @@ class MessageTests(Base):
     assert m.content_type is None
 
   def testCreateUnicode(self):
-    m = Message(u"unicode")
-    assert m.content == u"unicode"
+    m = Message("unicode")
+    assert m.content == "unicode"
     assert m.content_type == "text/plain"
 
   def testCreateMap(self):
@@ -46,7 +46,7 @@ class MessageTests(Base):
   def testContentTypeOverride(self):
     m = Message()
     m.content_type = "text/html; charset=utf8"
-    m.content = u"<html/>"
+    m.content = "<html/>"
     assert m.content_type == "text/html; charset=utf8"
 
 ECHO_Q = 'test-message-echo-queue; {create: always, delete: always}'
@@ -75,11 +75,11 @@ class MessageEchoTests(Base):
     self.check(Message("string"))
 
   def testUnicodeContent(self):
-    self.check(Message(u"unicode"))
+    self.check(Message("unicode"))
 
 
   TEST_MAP = {"key1": "string",
-              "key2": u"unicode",
+              "key2": "unicode",
               "key3": 3,
               "key4": -3,
               "key5": 3.14,
@@ -113,7 +113,7 @@ class MessageEchoTests(Base):
 
   def testApplicationProperties(self):
     msg = Message()
-    msg.properties["a"] = u"A"
+    msg.properties["a"] = "A"
     msg.properties["b"] = 1
     msg.properties["c"] = ["x", 2]
     msg.properties["d"] = "D"
@@ -179,7 +179,7 @@ class MessageEchoTests(Base):
       self.snd.send(msg)
       self.rcv.fetch(0)
       assert False, "Exception not raised on mismatched content/content_type"
-    except Exception, e:
+    except Exception as e:
       pass
 
   def testRecoverAfterException(self):

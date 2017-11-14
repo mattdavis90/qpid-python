@@ -66,14 +66,14 @@ class QueueTests(TestBase):
                               content=Content("two", properties={"headers": headers}))
 
         #check one queue has both messages and the other has only one
-        self.assertEquals("one", queue1.get(timeout=self.recv_timeout()).content.body)
+        self.assertEqual("one", queue1.get(timeout=self.recv_timeout()).content.body)
         try:
             msg = queue1.get(timeout=self.recv_timeout_negative())
             self.fail("Got extra message: %s" % msg.body)
         except Empty: pass
 
-        self.assertEquals("one", queue2.get(timeout=self.recv_timeout()).content.body)
-        self.assertEquals("two", queue2.get(timeout=self.recv_timeout()).content.body)
+        self.assertEqual("one", queue2.get(timeout=self.recv_timeout()).content.body)
+        self.assertEqual("two", queue2.get(timeout=self.recv_timeout()).content.body)
         try:
             msg = queue2.get(timeout=self.recv_timeout_negative())
             self.fail("Got extra message: " + msg)
@@ -109,7 +109,7 @@ class QueueTests(TestBase):
         try:
             channel.queue_declare(queue="auto-delete-me", passive=True)
             self.fail("Expected queue to have been deleted")
-        except Closed, e:
+        except Closed as e:
             self.assertChannelException(404, e.args[0])
 
     def test_flow_control(self):
@@ -121,7 +121,7 @@ class QueueTests(TestBase):
         channel.queue_declare(queue=queue_name, arguments={"x-qpid-capacity" : 25, "x-qpid-flow-resume-capacity" : 15})
 
         try:
-            for i in xrange(100):
+            for i in range(100):
                 channel.basic_publish(exchange="", routing_key=queue_name,
                                       content=Content("This is a message with more than 25 bytes. This should trigger flow control."))
                 time.sleep(.1)

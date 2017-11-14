@@ -76,7 +76,7 @@ def connect(host, port):
     try:
       sock.connect(sa)
       break
-    except socket.error, msg:
+    except socket.error as msg:
       sock.close()
   else:
     # If we got here then we couldn't connect (yet)
@@ -191,7 +191,7 @@ class URL:
     return s
 
   def __eq__(self, url):
-    if isinstance(url, basestring):
+    if isinstance(url, str):
       url = URL(url)
     return \
       self.scheme==url.scheme and \

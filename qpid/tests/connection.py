@@ -109,25 +109,25 @@ class ConnectionTest(TestCase):
     assert ssn2 == c.sessions["test2"]
     assert ssn1.channel != None
     assert ssn2.channel != None
-    assert ssn1 in c.attached.values()
-    assert ssn2 in c.attached.values()
+    assert ssn1 in list(c.attached.values())
+    assert ssn2 in list(c.attached.values())
 
     ssn1.close(5)
 
     assert ssn1.channel == None
-    assert ssn1 not in c.attached.values()
-    assert ssn2 in c.sessions.values()
+    assert ssn1 not in list(c.attached.values())
+    assert ssn2 in list(c.sessions.values())
 
     ssn2.close(5)
 
     assert ssn2.channel == None
-    assert ssn2 not in c.attached.values()
-    assert ssn2 not in c.sessions.values()
+    assert ssn2 not in list(c.attached.values())
+    assert ssn2 not in list(c.sessions.values())
 
     ssn = c.session("session", timeout=10)
 
     assert ssn.channel != None
-    assert ssn in c.sessions.values()
+    assert ssn in list(c.sessions.values())
 
     destinations = ("one", "two", "three")
 
@@ -170,7 +170,7 @@ class ConnectionTest(TestCase):
     try:
       m = echos.get(timeout=10)
       assert False
-    except Closed, e:
+    except Closed as e:
       pass
 
   def testCloseListen(self):

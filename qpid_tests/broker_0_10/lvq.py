@@ -72,7 +72,7 @@ class LVQTests (Base):
             counters[k] += 1
             messages.append(create_message(k, "%s-%i" % (k, counters[k])))
         # make sure we have sent at least one message for every key
-        for k, v in counters.iteritems():
+        for k, v in list(counters.items()):
             if v == 0:
                 counters[k] += 1
                 messages.append(create_message(k, "%s-%i" % (k, counters[k])))
@@ -82,7 +82,7 @@ class LVQTests (Base):
 
         rcv = self.ssn.receiver("lvq; {mode: browse}")
         retrieved = fetch_all_as_tuples(rcv)
-        print [v for k, v in retrieved]
+        print([v for k, v in retrieved])
 
         for k, v in retrieved:
             assert v == "%s-%i" % (k, counters[k])

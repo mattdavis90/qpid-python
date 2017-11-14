@@ -33,24 +33,24 @@ class BrokerStatsTests(Base):
 
     def assertEqual(self, left, right, text=None):
         if not left == right:
-            print "assertEqual failure: %r != %r" % (left, right)
+            print("assertEqual failure: %r != %r" % (left, right))
             if text:
-                print "  %r" % text
+                print("  %r" % text)
             assert None
 
     def failUnless(self, value, text=None):
         if value:
             return
-        print "failUnless failure",
+        print("failUnless failure", end=' ')
         if text:
-            print ": %r" % text
+            print(": %r" % text)
         else:
-            print
+            print()
         assert None
 
     def fail(self, text=None):
         if text:
-            print "Fail: %r" % text
+            print("Fail: %r" % text)
         assert None
 
     def setup_connection(self):
@@ -74,7 +74,7 @@ class BrokerStatsTests(Base):
             rx_a = sess.receiver("stats-test-exchange/a")
 
             exchange = agent.getExchange("stats-test-exchange")
-            self.failUnless(exchange, "expected a valid exchange object")
+            self.assertTrue(exchange, "expected a valid exchange object")
             self.assertEqual(exchange.msgReceives, 0, "msgReceives")
             self.assertEqual(exchange.msgDrops, 0, "msgDrops")
             self.assertEqual(exchange.msgRoutes, 0, "msgRoutes")
@@ -107,7 +107,7 @@ class BrokerStatsTests(Base):
         rx = sess.receiver("enqueue_test")
 
         queue = agent.getQueue("enqueue_test")
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
         self.assertEqual(queue.msgTotalEnqueues, 0, "msgTotalEnqueues")
         self.assertEqual(queue.byteTotalEnqueues, 0, "byteTotalEnqueues")
         self.assertEqual(queue.msgTotalDequeues, 0, "msgTotalDequeues")
@@ -130,8 +130,8 @@ class BrokerStatsTests(Base):
         self.assertEqual(queue.byteDepth, 100+(4*overhead), "byteDepth")
 
         now_broker = agent.getBroker()
-        self.failUnless((now_broker.msgTotalEnqueues - start_broker.msgTotalEnqueues) >= 4, "broker msgTotalEnqueues")
-        self.failUnless((now_broker.byteTotalEnqueues - start_broker.byteTotalEnqueues) >= 100, "broker byteTotalEnqueues")
+        self.assertTrue((now_broker.msgTotalEnqueues - start_broker.msgTotalEnqueues) >= 4, "broker msgTotalEnqueues")
+        self.assertTrue((now_broker.byteTotalEnqueues - start_broker.byteTotalEnqueues) >= 100, "broker byteTotalEnqueues")
 
         m = rx.fetch()
         m = rx.fetch()
@@ -146,8 +146,8 @@ class BrokerStatsTests(Base):
         self.assertEqual(queue.byteDepth, 70+(2*overhead), "byteDepth")
 
         now_broker = agent.getBroker()
-        self.failUnless((now_broker.msgTotalDequeues - start_broker.msgTotalDequeues) >= 2, "broker msgTotalDequeues")
-        self.failUnless((now_broker.byteTotalDequeues - start_broker.byteTotalDequeues) >= 30, "broker byteTotalDequeues")
+        self.assertTrue((now_broker.msgTotalDequeues - start_broker.msgTotalDequeues) >= 2, "broker msgTotalDequeues")
+        self.assertTrue((now_broker.byteTotalDequeues - start_broker.byteTotalDequeues) >= 30, "broker byteTotalDequeues")
         
         sess.close()
 
@@ -171,7 +171,7 @@ class BrokerStatsTests(Base):
         overhead = 41 #overhead added to message from headers
 
         queue = agent.getQueue("tx_enqueue_test")
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
         self.assertEqual(queue.msgTotalEnqueues,  0, "msgTotalEnqueues pre-tx-commit")
         self.assertEqual(queue.byteTotalEnqueues, 0, "byteTotalEnqueues pre-tx-commit")
         self.assertEqual(queue.msgTxnEnqueues,    0, "msgTxnEnqueues pre-tx-commit")
@@ -247,7 +247,7 @@ class BrokerStatsTests(Base):
 
         now_broker = agent.getBroker()
 
-        self.failUnless((now_broker.discardsNoRoute - start_broker.discardsNoRoute) >= 5, "Expect at least 5 no-routes")
+        self.assertTrue((now_broker.discardsNoRoute - start_broker.discardsNoRoute) >= 5, "Expect at least 5 no-routes")
 
         sess.close()
 
@@ -302,7 +302,7 @@ class BrokerStatsTests(Base):
         now_broker = agent.getBroker()
         queue = agent.getQueue("discards_ttl")
 
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
         self.assertEqual(queue.discardsTtl, 6, "expect 6 TTL discards on queue")
         self.assertEqual(now_broker.discardsTtl - start_broker.discardsTtl, 6, "expect 6 TTL discards on broker")
         self.assertEqual(queue.msgTotalDequeues, 6, "expect 6 total dequeues on queue")
@@ -328,7 +328,7 @@ class BrokerStatsTests(Base):
         now_broker = agent.getBroker()
         queue = agent.getQueue("discards_limit")
 
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
         self.assertEqual(queue.discardsOverflow, 1, "expect 1 overflow discard on queue")
         self.assertEqual(now_broker.discardsOverflow - start_broker.discardsOverflow, 1, "expect 1 overflow discard on broker")
 
@@ -365,7 +365,7 @@ class BrokerStatsTests(Base):
         now_broker = agent.getBroker()
         queue = agent.getQueue("discards_ring")
 
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
         self.assertEqual(queue.discardsRing, 2, "expect 2 ring discards on queue")
         self.assertEqual(now_broker.discardsRing - start_broker.discardsRing, 2, "expect 2 ring discards on broker")
         self.assertEqual(queue.msgTotalDequeues, 2, "expect 2 total dequeues on queue")
@@ -393,7 +393,7 @@ class BrokerStatsTests(Base):
         now_broker = agent.getBroker()
         queue = agent.getQueue("discards_lvq")
 
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
         self.assertEqual(queue.discardsLvq, 3, "expect 3 lvq discards on queue")
         self.assertEqual(now_broker.discardsLvq - start_broker.discardsLvq, 3, "expect 3 lvq discards on broker")
         self.assertEqual(queue.msgTotalDequeues, 3, "expect 3 total dequeues on queue")
@@ -422,7 +422,7 @@ class BrokerStatsTests(Base):
         now_broker = agent.getBroker()
         queue = agent.getQueue("discards_reject")
 
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
         self.assertEqual(queue.discardsSubscriber, 2, "expect 2 reject discards on queue")
         self.assertEqual(now_broker.discardsSubscriber - start_broker.discardsSubscriber, 2, "expect 2 reject discards on broker")
         self.assertEqual(queue.msgTotalDequeues, 3, "expect 3 total dequeues on queue")
@@ -451,13 +451,13 @@ class BrokerStatsTests(Base):
         now_broker = agent.getBroker()
         queue = agent.getQueue("message_release")
 
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
         self.assertEqual(queue.acquires, 2, "expect 2 acquires on queue")
-        self.failUnless(now_broker.acquires - start_broker.acquires >= 2, "expect at least 2 acquires on broker")
+        self.assertTrue(now_broker.acquires - start_broker.acquires >= 2, "expect at least 2 acquires on broker")
         self.assertEqual(queue.msgTotalDequeues, 0, "expect 0 total dequeues on queue")
 
         self.assertEqual(queue.releases, 2, "expect 2 releases on queue")
-        self.failUnless(now_broker.releases - start_broker.releases >= 2, "expect at least 2 releases on broker")
+        self.assertTrue(now_broker.releases - start_broker.releases >= 2, "expect at least 2 releases on broker")
 
         sess.close()
 
@@ -475,7 +475,7 @@ class BrokerStatsTests(Base):
         tx.send("PURGE")
 
         queue = agent.getQueue("discards_purge")
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
 
         queue.purge(3)
         queue.update()
@@ -504,7 +504,7 @@ class BrokerStatsTests(Base):
         tx.send("REROUTE")
 
         queue = agent.getQueue("reroute")
-        self.failUnless(queue, "expected a valid queue object")
+        self.assertTrue(queue, "expected a valid queue object")
 
         queue.reroute(5, False, 'amq.fanout')
         queue.update()

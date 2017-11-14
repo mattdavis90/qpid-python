@@ -47,7 +47,7 @@ class Base(Test):
 
     try:
       self.conn = self.setup_connection()
-    except ConnectError, e:
+    except ConnectError as e:
       raise Skipped(e)
     self.ssn = self.setup_session()
     self.snd = self.setup_sender()
@@ -125,7 +125,7 @@ class Base(Test):
       if redelivered:
         assert echo.redelivered, \
             "expected %s to be redelivered: %s" % (msg, echo)
-        if delta.has_key("redelivered"):
+        if "redelivered" in delta:
           del delta["redelivered"]
       assert mttl is not None and ettl is not None, "%s, %s" % (mttl, ettl)
       assert mttl >= ettl, "%s, %s" % (mttl, ettl)
@@ -233,4 +233,4 @@ class CompatURL(URL):
       s += ":%s" % self.port
     return s
 
-import address, endpoints, message, selector
+from . import address, endpoints, message, selector

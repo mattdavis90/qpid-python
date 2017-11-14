@@ -39,7 +39,7 @@ class CodecTest(TestCase):
     self.check("map", {"string": "this is a test"})
 
   def testMapUnicode(self):
-    self.check("map", {"unicode": u"this is a unicode test"})
+    self.check("map", {"unicode": "this is a unicode test"})
 
   def testMapBinary(self):
     self.check("map", {"binary": "\x7f\xb4R^\xe5\xf0:\x89\x96E1\xf6\xfe\xb9\x1b\xf5"})
@@ -80,7 +80,7 @@ class CodecTest(TestCase):
 
   def testMapAll(self):
     decoded = self.check("map", {"string": "this is a test",
-                                 "unicode": u"this is a unicode test",
+                                 "unicode": "this is a unicode test",
                                  "binary": "\x7f\xb4R^\xe5\xf0:\x89\x96E1\xf6\xfe\xb9\x1b\xf5",
                                  "int": 3,
                                  "long": 2**32,
@@ -130,4 +130,4 @@ class CodecTest(TestCase):
 
   def testDatetime(self):
     self.check("datetime", timestamp(0))
-    self.check("datetime", timestamp(long(time.time())))
+    self.check("datetime", timestamp(int(time.time())))

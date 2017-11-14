@@ -19,7 +19,7 @@
 
 from qpid.tests import Test
 from qpid.mimetype import lex, parse, ParseError, EOF, WSPACE
-from parser import ParserBase
+from .parser import ParserBase
 
 class MimeTypeTests(ParserBase, Test):
 

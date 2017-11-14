@@ -41,16 +41,16 @@ class AlternateExchangeTests(TestBase010):
         session.queue_declare(queue="returns", exclusive=True, auto_delete=True)
         session.exchange_bind(queue="returns", exchange="secondary")
         session.message_subscribe(destination="a", queue="returns")
-        session.message_flow(destination="a", unit=session.credit_unit.message, value=0xFFFFFFFFL)
-        session.message_flow(destination="a", unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination="a", unit=session.credit_unit.message, value=0xFFFFFFFF)
+        session.message_flow(destination="a", unit=session.credit_unit.byte, value=0xFFFFFFFF)
         returned = session.incoming("a")
 
         #declare, bind (to the primary exchange) and consume from a queue for 'processed' messages
         session.queue_declare(queue="processed", exclusive=True, auto_delete=True)
         session.exchange_bind(queue="processed", exchange="primary", binding_key="my-key")
         session.message_subscribe(destination="b", queue="processed")
-        session.message_flow(destination="b", unit=session.credit_unit.message, value=0xFFFFFFFFL)
-        session.message_flow(destination="b", unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination="b", unit=session.credit_unit.message, value=0xFFFFFFFF)
+        session.message_flow(destination="b", unit=session.credit_unit.byte, value=0xFFFFFFFF)
         processed = session.incoming("b")
 
         #publish to the primary exchange
@@ -110,11 +110,11 @@ class AlternateExchangeTests(TestBase010):
         try:
             session2.exchange_delete(exchange="alternate")
             self.fail("Expected deletion of in-use alternate-exchange to fail")
-        except SessionException, e:
+        except SessionException as e:
             session = self.session
             session.queue_delete(queue="q")
             session.exchange_delete(exchange="alternate")
-            self.assertEquals(530, e.args[0].error_code)            
+            self.assertEqual(530, e.args[0].error_code)            
 
 
     def test_delete_while_used_by_exchange(self):
@@ -130,11 +130,11 @@ class AlternateExchangeTests(TestBase010):
         try:
             session.exchange_delete(exchange="alternate")
             self.fail("Expected deletion of in-use alternate-exchange to fail")
-        except SessionException, e:
+        except SessionException as e:
             session = self.session
             session.exchange_delete(exchange="e")
             session.exchange_delete(exchange="alternate")
-            self.assertEquals(530, e.args[0].error_code)
+            self.assertEqual(530, e.args[0].error_code)
 
 
     def test_modify_existing_exchange_alternate(self):
@@ -150,8 +150,8 @@ class AlternateExchangeTests(TestBase010):
             # attempt to change the alternate on an already existing exchange
             session.exchange_declare(exchange="onealternate", type="fanout", alternate_exchange="alt2")
             self.fail("Expected changing an alternate on an existing exchange to fail")
-        except SessionException, e:
-            self.assertEquals(530, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(530, e.args[0].error_code)
         session = self.conn.session("alternate", 2)
         session.exchange_delete(exchange="onealternate")
         session.exchange_delete(exchange="alt2")
@@ -170,8 +170,8 @@ class AlternateExchangeTests(TestBase010):
             # attempt to add an alternate on an already existing exchange
             session.exchange_declare(exchange="noalternate", type="fanout", alternate_exchange="alt1")
             self.fail("Expected adding an alternate on an existing exchange to fail")
-        except SessionException, e:
-            self.assertEquals(530, e.args[0].error_code)
+        except SessionException as e:
+            self.assertEqual(530, e.args[0].error_code)
         session = self.conn.session("alternate", 2)
         session.exchange_delete(exchange="noalternate")
         session.exchange_delete(exchange="alt1")
@@ -202,8 +202,8 @@ class AlternateExchangeTests(TestBase010):
         session.queue_declare(queue="deleted", exclusive=True, auto_delete=True)
         session.exchange_bind(exchange="dlq", queue="deleted")
         session.message_subscribe(destination="dlq", queue="deleted")
-        session.message_flow(destination="dlq", unit=session.credit_unit.message, value=0xFFFFFFFFL)
-        session.message_flow(destination="dlq", unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination="dlq", unit=session.credit_unit.message, value=0xFFFFFFFF)
+        session.message_flow(destination="dlq", unit=session.credit_unit.byte, value=0xFFFFFFFF)
         dlq = session.incoming("dlq")
 
         #on a separate session, create an auto-deleted queue using the
@@ -220,7 +220,7 @@ class AlternateExchangeTests(TestBase010):
             session2.message_transfer(message=Message(dp, "Three"))
             session2.message_subscribe(destination="incoming", queue="my-queue")
             session2.message_flow(destination="incoming", unit=session.credit_unit.message, value=1)
-            session2.message_flow(destination="incoming", unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+            session2.message_flow(destination="incoming", unit=session.credit_unit.byte, value=0xFFFFFFFF)
             self.assertEqual("One", session2.incoming("incoming").get(timeout=1).body)
             session2.close()
 
@@ -315,8 +315,8 @@ class AlternateExchangeTests(TestBase010):
 
         #get and reject those messages:
         session.message_subscribe(destination="a", queue="delivery-queue")
-        session.message_flow(destination="a", unit=session.credit_unit.message, value=0xFFFFFFFFL)
-        session.message_flow(destination="a", unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination="a", unit=session.credit_unit.message, value=0xFFFFFFFF)
+        session.message_flow(destination="a", unit=session.credit_unit.byte, value=0xFFFFFFFF)
         incoming = session.incoming("a")
         for m in ["One", "Two", "Three"]:
             msg = incoming.get(timeout=1)
@@ -339,8 +339,8 @@ class AlternateExchangeTests(TestBase010):
         session.queue_declare(queue="deleted", exclusive=True, auto_delete=True)
         session.exchange_bind(exchange="dlq", queue="deleted")
         session.message_subscribe(destination="dlq", queue="deleted")
-        session.message_flow(destination="dlq", unit=session.credit_unit.message, value=0xFFFFFFFFL)
-        session.message_flow(destination="dlq", unit=session.credit_unit.byte, value=0xFFFFFFFFL)
+        session.message_flow(destination="dlq", unit=session.credit_unit.message, value=0xFFFFFFFF)
+        session.message_flow(destination="dlq", unit=session.credit_unit.byte, value=0xFFFFFFFF)
         dlq = session.incoming("dlq")
         return dlq
 

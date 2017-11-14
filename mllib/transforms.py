@@ -21,8 +21,8 @@
 Useful transforms for dom objects.
 """
 
-import dom
-from cStringIO import StringIO
+from . import dom
+from io import StringIO
 
 class Visitor:
 
